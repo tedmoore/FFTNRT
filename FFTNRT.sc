@@ -1,7 +1,7 @@
 FFTNRT {
 
 	*fft {
-		arg filePath,  action, fftSize = 2048, overlap = 2;
+		arg filePath,  action, fftSize = 2048, overlap = 2, verbose = false;
 		SoundFile.use(filePath,{
 			arg sf;
 			var data, window, frames, currentSample = 0,hopSamples, fft, imag;
@@ -30,7 +30,7 @@ FFTNRT {
 			frames = [];
 			while({currentSample < data.size},{
 				var newFrame,endIndex;
-				//currentSample.postln;
+				if(verbose,{(currentSample/data.size).postln});
 				endIndex = ((currentSample + fftSize).round(1)-1).asInteger;
 				endIndex = min(endIndex,data.size-1);
 				//endIndex.postln;
@@ -58,8 +58,10 @@ FFTNRT {
 
 			imag = Signal.newClear(fftSize);
 			fft = frames.collect({
-				arg frame;
+				arg frame, i;
 				var fft;
+
+				if(verbose,{(i/frames.size).postln});
 				//frame.size.postln;
 				frame = frame * window;
 				fft = fft(frame,imag,Signal.fftCosTable(fftSize));
@@ -70,7 +72,7 @@ FFTNRT {
 				[frame.mag,frame.phs];
 			});
 
-			action.value(fft);
+			action.value(fft,sf.sampleRate);
 		});
 	}
 
